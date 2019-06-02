@@ -42,6 +42,7 @@
             // the fill color
             //ctx.fillStyle = "#FFCC00";
             ctx.fill();
+            ctx.rotate(-rot);
             ctx.translate(-x, -y);
         }
         var canvas = document.getElementById('canvas');
@@ -50,9 +51,25 @@
         ctx.canvas.height = window.innerHeight - 40;
         var cx = Math.floor(ctx.canvas.width / 2);
         var cy = Math.floor(ctx.canvas.height / 2);
-        for(var i=100;i<=cx-100;i+=100){
-            for(var j=100;j<cy-100;j+=100){
-                printArrow(i,j,Math.atan2(cy,cx));
+        for(var i=cx-40;i>=0;i-=80){
+            for(var j=cy-40;j>=0;j-=80){
+                printArrow(i,j,Math.atan2(j-cy,i-cx));
+                console.log(i,j);
+            }
+        }
+        for(var i=cx+40;i<=2*cx;i+=80){
+            for(var j=cy-40;j>=0;j-=80){
+                printArrow(i,j,Math.atan2(j-cy,i-cx));
+            }
+        }
+        for(var i=cx+40;i<=2*cx;i+=80){
+            for(var j=cy+40;j<2*cy;j+=80){
+                printArrow(i,j,Math.atan2(j-cy,i-cx));
+            }
+        }
+        for(var i=cx-40;i>=0;i-=80){
+            for(var j=cy-40;j<2*cy-0;j+=80){
+                printArrow(i,j,Math.atan2(j-cy,i-cx));
             }
         }
         ctx.beginPath();
@@ -62,7 +79,6 @@
         ctx.fillStyle = 'white';
         ctx.fillRect(cx-6, cy-30, 13, 61);
         ctx.fillRect(cx-30, cy-6, 61, 13);
-        printArrow(100, 100, Math.PI / 4);
     </script>
 </body>
 
