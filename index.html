@@ -12,17 +12,68 @@
             position: absolute;
             top: 10px;
             left: 10px;
+            z-index: 2;
+        }
+        .container{
+            position: absolute;
+            top:0;
+            right: 0;
+            width:300px;
+            padding:30px;
+            border: 2px black solid;
+            z-index: 3;
+        }
+        .slidecontainer {
+            width: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 25px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-
+    <div class="container">
+        <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+        </div>
+    </div>
     <canvas id="canvas"></canvas>
 
     <script>
         var arrows = [];
         var pointCharges = [];
+        var chargeScalingFactor = 0.2;
+        var arrowScalingFactor = 0.2;
+        var arrowGapScalingFactor = 0.2;
         var k = 1000000; //constant for inverse square law
         function drawArrow() {
             ctx.fillStyle = 'red';
@@ -31,11 +82,11 @@
                 ctx.translate(a.positionalX, a.positionalY);
                 let rot = Math.atan2(a.ey, a.ex);
                 ctx.rotate(rot);
-                ctx.fillRect(0, -2, 50, 5);
+                ctx.fillRect(0, -2 * arrowScalingFactor, 50 * arrowScalingFactor, 5 * arrowScalingFactor);
                 ctx.beginPath();
-                ctx.moveTo(50, 15);
-                ctx.lineTo(70, 0);
-                ctx.lineTo(50, -15);
+                ctx.moveTo(50 * arrowScalingFactor, 15 * arrowScalingFactor);
+                ctx.lineTo(70 * arrowScalingFactor, 0);
+                ctx.lineTo(50 * arrowScalingFactor, -15 * arrowScalingFactor);
                 ctx.closePath();
                 ctx.fill();
                 ctx.rotate(-rot);
@@ -67,23 +118,23 @@
             }
         };
         function initArrow() {
-            for (var i = cx - 40; i >= 0; i -= 80) {
-                for (var j = cy - 40; j >= 0; j -= 80) {
+            for (var i = cx - 40 * arrowGapScalingFactor; i >= 0; i -= 80 * arrowGapScalingFactor) {
+                for (var j = cy - 40 * arrowGapScalingFactor; j >= 0; j -= 80 * arrowGapScalingFactor) {
                     arrows.push(new Arrow(i, j));
                 }
             }
-            for (var i = cx + 40; i <= 2 * cx; i += 80) {
-                for (var j = cy - 40; j >= 0; j -= 80) {
+            for (var i = cx + 40 * arrowGapScalingFactor; i <= 2 * cx; i += 80 * arrowGapScalingFactor) {
+                for (var j = cy - 40 * arrowGapScalingFactor; j >= 0; j -= 80 * arrowGapScalingFactor) {
                     arrows.push(new Arrow(i, j));
                 }
             }
-            for (var i = cx + 40; i <= 2 * cx; i += 80) {
-                for (var j = cy + 40; j < 2 * cy; j += 80) {
+            for (var i = cx + 40 * arrowGapScalingFactor; i <= 2 * cx; i += 80 * arrowGapScalingFactor) {
+                for (var j = cy + 40 * arrowGapScalingFactor; j < 2 * cy; j += 80 * arrowGapScalingFactor) {
                     arrows.push(new Arrow(i, j));
                 }
             }
-            for (var i = cx - 40; i >= 0; i -= 80) {
-                for (var j = cy - 40; j < 2 * cy - 0; j += 80) {
+            for (var i = cx - 40 * arrowGapScalingFactor; i >= 0; i -= 80 * arrowGapScalingFactor) {
+                for (var j = cy - 40 * arrowGapScalingFactor; j < 2 * cy - 0; j += 80 * arrowGapScalingFactor) {
                     arrows.push(new Arrow(i, j));
                 }
             }
@@ -91,12 +142,19 @@
         function drawCharge() {
             for (q of pointCharges) {
                 ctx.beginPath();
-                ctx.arc(q.positionalX, q.positionalY, 40, 0, 2 * Math.PI);
-                ctx.fillStyle = "blue";
+                ctx.arc(q.positionalX, q.positionalY, 40 * chargeScalingFactor, 0, 2 * Math.PI);
+                if (q.charge > 0) {
+                    ctx.fillStyle = "blue";
+                }
+                else {
+                    ctx.fillStyle = "red";
+                }
                 ctx.fill();
                 ctx.fillStyle = 'white';
-                ctx.fillRect(q.positionalX - 6, q.positionalY - 30, 13, 61);
-                ctx.fillRect(q.positionalX - 30, q.positionalY - 6, 61, 13);
+                ctx.fillRect(q.positionalX - 30 * chargeScalingFactor, q.positionalY - 6 * chargeScalingFactor, 61 * chargeScalingFactor, 13 * chargeScalingFactor);
+                if (q.charge > 0) {
+                    ctx.fillRect(q.positionalX - 6 * chargeScalingFactor, q.positionalY - 30 * chargeScalingFactor, 13 * chargeScalingFactor, 61 * chargeScalingFactor);
+                }
             }
         }
         function addPointCharge(x, y, q) {
@@ -109,15 +167,17 @@
         var cx = Math.floor(ctx.canvas.width / 2);
         var cy = Math.floor(ctx.canvas.height / 2);
         initArrow();
-        for(a of arrows){
+        for (a of arrows) {
             console.log(a);
         }
-        addPointCharge(cx - 500, cy, 1);
-        addPointCharge(cx + 50, cy-400, 1);
-        addPointCharge(cx + 50, cy+400, 1);
+        addPointCharge(cx - 100, cy - 100, 100);
+        addPointCharge(cx + 100, cy - 100, -100);
+        addPointCharge(cx + 100, cy + 100, 100);
+        addPointCharge(cx - 100, cy + 100, -100);
         calcE();
-        drawCharge();
         drawArrow();
+        drawCharge();
+
     </script>
 </body>
 
